@@ -11,19 +11,10 @@ const db = new pg.Client({
   database: "world",
   password: "postgres",
   port: 5432
-})
+});
+db.connect();
 
-db.connect()
-
-
-// let countries = [];
-
-
-
-let visitedCountries = [];
-
-
-
+let countries = [];
 
 app.use(bodyParser.urlencoded({
   extended: true
@@ -33,20 +24,22 @@ app.use(express.static("public"));
 app.get("/", async (req, res) => {
   //Write your code here.
 
-  const results = await db.query("SELECT visited_countries FROM visited_countries") // Query
-  console.log("There are " + results.rows.length + " entries.")                     // Control
+  const results = await db.query("SELECT country_code FROM visited_countries") // Query
+  let total = results.rows.length;
+  console.log(`There are ${total} entries.`)                     // Control
 
-  results.rows.forEach(row => {                                                     // Push the strings in the array
-    visitedCountries.push(row.visited_countries);
+  results.rows.forEach((country) => {
+    countries.push(country.country_code);
   });
+  console.log(results.rows);
 
   res.render("index.ejs", {                                                         // Rendering
-    countries: visitedCountries,
-    total: results.rows.length
+    countries: countries,
+    total: total
   })
 
-console.log(visitedCountries)                                                       // Control
-
+console.log(countries)                                                       // Control
+db.end();
 });
 
 app.listen(port, () => {
